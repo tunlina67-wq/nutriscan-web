@@ -1,0 +1,39 @@
+# Every push to main uploads the app to your Hugging Face Space, which then rebuilds.
+# Setup (once), in the GitHub repo → Settings → Secrets and variables → Actions:
+#   Secret   HF_TOKEN  = a Hugging Face access token with "write" permission
+#   Variable HF_SPACE  = your Space id, e.g.  your-hf-username/nutriscan
+name: Sync to Hugging Face Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install huggingface_hub
+
+      - name: Upload app files to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+          HfApi(token=os.environ["HF_TOKEN"]).upload_folder(
+              repo_id=os.environ["HF_SPACE"], repo_type="space", folder_path=".",
+              allow_patterns=["app.py", "requirements.txt", "Dockerfile", ".dockerignore",
+                              "README.md", "nutriscan/*.py", "static/*",
+                              "models/*.pt", "models/*.joblib"],
+              commit_message=f"Sync from GitHub {os.environ.get('GITHUB_SHA', '')[:7]}",
+          )
+          EOF

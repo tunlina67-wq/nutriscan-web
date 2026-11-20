@@ -1,0 +1,11 @@
+venv/
+venv.broken/
+__pycache__/
+*.pyc
+.env
+.git/
+.github/
+eval_photos/
+NutriScan_results/
+*.ipynb
+yolov8n.pt

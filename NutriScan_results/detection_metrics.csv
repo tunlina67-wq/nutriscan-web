@@ -1,0 +1,2 @@
+split,images,precision,recall,mAP@50,mAP@50-95
+test,3,0.734,0.936,0.913,0.677

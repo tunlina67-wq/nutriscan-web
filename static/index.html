@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14532D">
+  <title>NutriScan AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2384CC16' d='M17 8C8 10 5.9 16.2 3.8 21.3l1.9.7.9-2.3c.5.2 1 .3 1.4.3C19 20 22 3 22 3c-1 2-8 2.3-13 3.3S2 11.5 2 13.5s1.8 3.8 1.8 3.8C7 8 17 8 17 8z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ App bar ============ -->
+  <header class="appbar">
+    <button class="icon-btn" id="backBtn" aria-label="Back" hidden>
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="brand" id="brand">
+      <svg class="leaf" viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.2 3.8 21.3l1.9.7.9-2.3c.5.2 1 .3 1.4.3C19 20 22 3 22 3c-1 2-8 2.3-13 3.3S2 11.5 2 13.5s1.8 3.8 1.8 3.8C7 8 17 8 17 8z"/></svg>
+      <span id="barTitle">NutriScan</span>
+    </div>
+    <button class="icon-btn" id="profileBtn" aria-label="My profile">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ============ Screen 1: Scan ============ -->
+    <section class="screen active" id="scr-scan">
+      <h1 class="hero">Snap a label.<br><em>Understand what you eat.</em></h1>
+
+      <label class="viewfinder" for="cameraInput">
+        <svg class="cam" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Point at the nutrition table</span>
+      </label>
+
+      <label class="btn primary" for="cameraInput">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Scan Label
+      </label>
+      <label class="btn outline" for="uploadInput">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+        Upload Photo
+      </label>
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+      <input type="file" id="uploadInput" accept="image/*" hidden>
+
+      <div class="links">
+        <button class="link" id="demoBtn">Try the demo label</button>
+        <span aria-hidden="true">·</span>
+        <button class="link" id="manualBtn">Type values manually</button>
+      </div>
+
+      <button class="profile-card" id="profileCard">
+        <div>
+          <div class="pc-title" id="pcTitle">Daily needs: 2,000 kcal</div>
+          <div class="pc-sub" id="pcSub">Standard Thai RDI. Set up your profile for personal advice</div>
+        </div>
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <div class="ai-status">
+        <div class="ai-title">AI modules</div>
+        <div class="chips" id="aiChips"></div>
+      </div>
+    </section>
+
+    <!-- ============ Loading ============ -->
+    <section class="screen" id="scr-loading">
+      <div class="preview-wrap"><img id="loadingImg" alt="Your photo"><div class="scanline"></div></div>
+      <ol class="steps" id="loadSteps">
+        <li data-step="0">Detecting nutrition table <small>YOLOv8</small></li>
+        <li data-step="1">Reading Thai + English text <small>OCR</small></li>
+        <li data-step="2">Extracting nutrients <small>NLP + regex</small></li>
+      </ol>
+    </section>
+
+    <!-- ============ Screen 2: Nutrients Found ============ -->
+    <section class="screen" id="scr-nutrients">
+      <div class="crop-row">
+        <img id="cropImg" alt="Detected nutrition table">
+        <div>
+          <div class="det-badge" id="detBadge"></div>
+          <p class="hint">See values read by AI. Tap any value to correct it.</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="productName">Product</label>
+        <input id="productName" type="text" placeholder="e.g. Royal-D Grape" maxlength="80">
+      </div>
+      <div class="field serving">
+        <label for="servingSize">Serving size</label>
+        <div class="inline">
+          <input id="servingSize" type="number" inputmode="decimal" min="0" step="any" placeholder="330">
+          <select id="servingUnit" aria-label="Serving unit"><option value="ml">ml</option><option value="g">g</option></select>
+        </div>
+      </div>
+
+      <div class="ntable" id="nutrientTable"></div>
+      <div class="warnings" id="scanWarnings" hidden></div>
+
+      <details class="raw" id="rawBox" hidden>
+        <summary>Raw OCR text</summary>
+        <pre id="rawText"></pre>
+      </details>
+
+      <button class="btn primary" id="analyzeBtn">Analyze <span aria-hidden="true">→</span></button>
+    </section>
+
+    <!-- ============ Screen 3: Your Result ============ -->
+    <section class="screen" id="scr-result">
+      <div class="grade-head">
+        <div class="grade" id="gradeBadge">C</div>
+        <div>
+          <div class="g-label">Health grade</div>
+          <div class="g-product" id="resProduct"></div>
+          <div class="g-sub" id="gradeSub"></div>
+        </div>
+      </div>
+
+      <div class="card advice">
+        <div class="advice-head">
+          <svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></svg>
+          <span>AI advice</span>
+          <span class="tag" id="adviceTag"></span>
+        </div>
+        <p id="adviceText"></p>
+      </div>
+
+      <h2 class="sec">Per serving · % of your daily limit</h2>
+      <div class="bars" id="limitBars"></div>
+
+      <div id="targetWrap">
+        <h2 class="sec">Good nutrients · % of daily target</h2>
+        <div class="bars" id="targetBars"></div>
+      </div>
+
+      <details class="card how">
+        <summary>How was this graded?</summary>
+        <div class="how-body">
+          <h3>Expert system rules <span class="pill" id="rulesGrade"></span></h3>
+          <ul id="rulesList"></ul>
+          <h3>ML classifier <span class="pill" id="mlGrade"></span></h3>
+          <div id="mlBody"></div>
+          <h3>Your daily needs</h3>
+          <p id="needsText"></p>
+        </div>
+      </details>
+
+      <div class="row-btns">
+        <button class="btn outline" id="editBtn">Edit values</button>
+        <button class="btn primary" id="againBtn">Scan another</button>
+      </div>
+      <p class="disclaimer">NutriScan gives general nutrition information, not medical advice.</p>
+    </section>
+
+    <!-- ============ Profile ============ -->
+    <section class="screen" id="scr-profile">
+      <p class="hint">Your profile personalizes daily limits and advice. It stays on this device.</p>
+      <form id="profileForm" class="pform">
+        <div class="field">
+          <span class="flabel">Sex</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="sex" value="female"><span>Female</span></label>
+            <label><input type="radio" name="sex" value="male"><span>Male</span></label>
+          </div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label for="age">Age</label><input id="age" name="age" type="number" min="10" max="100" inputmode="numeric" placeholder="21"></div>
+          <div class="field"><label for="height">Height (cm)</label><input id="height" name="height_cm" type="number" min="100" max="230" inputmode="decimal" placeholder="170"></div>
+          <div class="field"><label for="weight">Weight (kg)</label><input id="weight" name="weight_kg" type="number" min="25" max="250" inputmode="decimal" placeholder="60"></div>
+        </div>
+        <div class="field">
+          <label for="activity">Activity level</label>
+          <select id="activity" name="activity">
+            <option value="sedentary">Sedentary (little exercise)</option>
+            <option value="light" selected>Light (1–3 days/week)</option>
+            <option value="moderate">Moderate (3–5 days/week)</option>
+            <option value="active">Active (6–7 days/week)</option>
+            <option value="very_active">Very active (athlete)</option>
+          </select>
+        </div>
+        <div class="field">
+          <span class="flabel">Goal</span>
+          <div class="goal-chips">
+            <label><input type="radio" name="goal" value="general" checked><span>General health</span></label>
+            <label><input type="radio" name="goal" value="lose_weight"><span>Lose weight</span></label>
+            <label><input type="radio" name="goal" value="build_muscle"><span>Build muscle</span></label>
+            <label><input type="radio" name="goal" value="reduce_sugar"><span>Reduce sugar</span></label>
+            <label><input type="radio" name="goal" value="reduce_salt"><span>Reduce salt</span></label>
+          </div>
+        </div>
+        <div class="row-btns">
+          <button type="button" class="btn outline" id="clearProfile">Clear</button>
+          <button type="submit" class="btn primary">Save profile</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

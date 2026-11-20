@@ -1,0 +1,25 @@
+Random Forest health-grade classifier
+Training products: 221,163 | Test products: 55,291
+Test accuracy: 0.875 | Within one grade: 0.977
+
+              precision    recall  f1-score   support
+
+           A      0.862     0.881     0.871      8680
+           B      0.709     0.759     0.733      5442
+           C      0.842     0.815     0.828     11014
+           D      0.903     0.892     0.897     14426
+           E      0.941     0.939     0.940     15729
+
+    accuracy                          0.875     55291
+   macro avg      0.852     0.857     0.854     55291
+weighted avg      0.876     0.875     0.876     55291
+
+Feature importance:
+  sodium_g     0.230
+  sugar_g      0.164
+  sat_fat_g    0.147
+  energy_kcal  0.129
+  protein_g    0.108
+  carbs_g      0.098
+  total_fat_g  0.097
+  is_beverage  0.027

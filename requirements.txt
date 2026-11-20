@@ -1,0 +1,13 @@
+# Web app + rules + ML
+flask>=3.0
+numpy
+pandas
+opencv-python-headless
+scikit-learn
+joblib
+requests
+matplotlib
+
+# AI models (large download, includes PyTorch ~1 GB)
+easyocr
+ultralytics
